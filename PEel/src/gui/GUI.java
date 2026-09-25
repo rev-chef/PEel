@@ -1,11 +1,7 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.awt.*;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +24,7 @@ public class GUI implements BananaListener{
 	private JFrame frame = new JFrame("PEel");
 	private JPanel mainPanel = new JPanel();
 	private JPanel infoPanel = new JPanel();
+	private JPanel infoComparePanel = new JPanel();
 	private JScrollPane scrollPane;
 	private PaintGraphics banana = new PaintGraphics();
 	private PopupManager popupManager;
@@ -35,6 +32,7 @@ public class GUI implements BananaListener{
 	private ExceptionManager exceptionManager;
 	private FileManager fileManager;
 	private String fileName;
+	private static String bytesFlag; //variable 
 	
 	public void drawUI() {
 		
@@ -54,6 +52,7 @@ public class GUI implements BananaListener{
 		FileManager.setExceptionManager(exceptionManager);
 		popupManager = new PopupManager(frame, this);
 		
+		bytesFlag = "kb";
 		//created a small method for this because the code looked unseemly here
 		setIcon();
 		
@@ -76,6 +75,9 @@ public class GUI implements BananaListener{
 					break;
 				case "Mid":
 					displaySectionHeaders();
+					break;
+				case "MidBot":
+					displayFileInformation();
 					break;
 			}
 		});
@@ -122,24 +124,18 @@ public class GUI implements BananaListener{
 		mainPanel.setLayout(experimentLayout);
 		
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+		
 		scrollPane = new JScrollPane(infoPanel);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+		infoPanel.setSize(scrollPane.getSize());
 		
 		mainPanel.add(scrollPane);
 		return mainPanel;
 	}
 	
-	public void addInfoPanel(ArrayList<String> readFileData) {
-		infoPanel.removeAll();
+	public JPanel setComparisonPanel() {
 		
-		for(String s : readFileData)
-		{
-			JLabel data = new JLabel(s);
-			infoPanel.add(data);
-			
-		}
-		
-		infoPanel.revalidate();
-		infoPanel.repaint();
+		return null;
 	}
 
 	public JFrame getFrame() {
@@ -173,9 +169,21 @@ public class GUI implements BananaListener{
 		JPanel optPanel = new JPanel();
 		JPanel dataPanel = new JPanel();
 		
+		JPanel coffHeaderPanel = new JPanel();
+		JPanel optHeaderPanel = new JPanel();
+		JPanel dataHeaderPanel = new JPanel();
+		
+		JTextField coffTxt = new JTextField();
+		JTextField optTxt = new JTextField();
+		JTextField dataTxt = new JTextField();
+		
 		coffPanel.setLayout(new BoxLayout(coffPanel, BoxLayout.Y_AXIS));
 		optPanel.setLayout(new BoxLayout(optPanel, BoxLayout.Y_AXIS));
 		dataPanel.setLayout(new BoxLayout(dataPanel, BoxLayout.Y_AXIS));
+		
+		coffHeaderPanel.setLayout(new BoxLayout(coffHeaderPanel, BoxLayout.X_AXIS));
+		optHeaderPanel.setLayout(new BoxLayout(optHeaderPanel, BoxLayout.X_AXIS));
+		dataHeaderPanel.setLayout(new BoxLayout(dataHeaderPanel, BoxLayout.X_AXIS));
 		
 		coffPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 		optPanel.setBorder(BorderFactory.createRaisedBevelBorder());
@@ -184,6 +192,10 @@ public class GUI implements BananaListener{
 		coffPanel.setName("Coff Header");
 		optPanel.setName("Optional Header");
 		dataPanel.setName("Data Directories");
+		
+		initializeTextField(coffTxt, coffPanel);
+		initializeTextField(optTxt, optPanel);
+		initializeTextField(dataTxt, dataPanel);
 		
 		CoffFileHeader coffHeader = FileManager.getPEData(CoffFileHeader.class);
 		OptionalHeader optionalHeader = FileManager.getPEData(OptionalHeader.class);
@@ -197,7 +209,7 @@ public class GUI implements BananaListener{
 		
 		infoPanel.removeAll();
 		
-		coffPanel.add(new JLabel("<html><h3>Coff Header</h3></html>"));
+		coffHeaderPanel.add(new JLabel("<html><h3>Coff Header</h3></html>"));
 		addInfoLine(coffPanel, "Machine: ", coffHeader.getMachine());
 		addInfoLine(coffPanel, "Number of Sections: ", coffHeader.getNumberOfSections());
 		addInfoLine(coffPanel, "Timestamp: ", coffHeader.getTimeDateStamp());
@@ -205,7 +217,7 @@ public class GUI implements BananaListener{
 		addInfoLine(coffPanel, "Characteristics: ", coffHeader.getCharacteristics());
 		
 		
-		optPanel.add(new JLabel("<html><h3>Optional Header</h3></html>"));
+		optHeaderPanel.add(new JLabel("<html><h3>Optional Header</h3></html>"));
 		addInfoLine(optPanel, "Magic Number: ", optionalHeader.getMagic());
 		addInfoLine(optPanel, "Major Linker Version: ", optionalHeader.getMajorLinkerVersion());
 		addInfoLine(optPanel, "Minor Linker Version: ", optionalHeader.getMinorLinkerVersion());
@@ -219,7 +231,7 @@ public class GUI implements BananaListener{
 		addInfoLine(optPanel, "File Alignment: 0x", Long.toHexString(optionalHeader.getFileAlignment()));
 		addInfoLine(optPanel, "Subsystem Version: ", optionalHeader.getSubsystemVersion());
 		addInfoLine(optPanel, "Win32 Version Value: ", optionalHeader.getWin32VersionValue());
-		addInfoLine(optPanel, "Size of Image: ", String.format("0x%X (%.2f kb)", optionalHeader.getSizeOfImage(), convertToKb(optionalHeader.getSizeOfImage()) ));
+		addInfoLine(optPanel, "Size of Image: ", String.format("0x%X (%.2f " + bytesFlag + ")", optionalHeader.getSizeOfImage(),  convertToKb(optionalHeader.getSizeOfImage())  ));
 		addInfoLine(optPanel, "Size of Headers: ", optionalHeader.getSizeOfHeaders());
 		addInfoLine(optPanel, "Subsystem Field: ", optionalHeader.getSubsystemField());
 		addInfoLine(optPanel, "DLL Characteristics: ", optionalHeader.getDllCharacteristics());
@@ -230,7 +242,7 @@ public class GUI implements BananaListener{
 		addInfoLine(optPanel, "Loader Flags: ", optionalHeader.getLoaderFlags());
 		addInfoLine(optPanel, "Number of Data Directory Sections: ", optionalHeader.getNumberOfRVAAndSizes());
 		
-		dataPanel.add(new JLabel("<html><h3>Data Directories</h3></html>"));
+		dataHeaderPanel.add(new JLabel("<html><h3>Data Directories</h3></html>"));
 		addInfoLine(dataPanel, "Export Table Virtual Address: 0x", Long.toHexString(dataHeader.getExportTableRVA()));
 		addInfoLine(dataPanel, "Export Table Size: 0x", Long.toHexString(dataHeader.getExportTableSize()));
 		addInfoLine(dataPanel, "Import Table Virtual Address: 0x", Long.toHexString(dataHeader.getImportTableRVA()));
@@ -262,10 +274,15 @@ public class GUI implements BananaListener{
 		addInfoLine(dataPanel, "CLR Runtime Size: 0x", Long.toHexString(dataHeader.getCLRRuntimeSize()));
 		addInfoLine(dataPanel, "Balogna Section (Unnamed Reserved, Should be 0): ", dataHeader.getUnnamedReserved());
 		
+		infoPanel.add(coffHeaderPanel);
 		infoPanel.add(coffPanel);
 		infoPanel.add(Box.createVerticalStrut(20));
+		
+		infoPanel.add(optHeaderPanel);
 		infoPanel.add(optPanel);
 		infoPanel.add(Box.createVerticalStrut(20));
+		
+		infoPanel.add(dataHeaderPanel);
 		infoPanel.add(dataPanel);
 		
 		infoPanel.revalidate();
@@ -281,18 +298,17 @@ public class GUI implements BananaListener{
 		importPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 		
 		ArrayList<ImportTable> imports = FileManager.getPEData(ImportTableList.class);
-		
-		if(imports == null) {return;}
+		imports.toString();
 		
 		importPanel.add(new JLabel("<html><h3>Imports</h3></html>"));
 		
 		for(ImportTable i : imports)
 		{
-			addInfoLine(importPanel, "<html><b>", (i.getDllName()+ "</b></html>") );
+			importPanel.add(new JLabel("<html><b> "+ i.getDllName() +"</b></html>"));
 			
 			for(String process : i.getDllProcesses())
 			{
-				addInfoLine(importPanel, "      ", process);
+				addInfoLine(importPanel, process);
 			}
 			importPanel.add(Box.createVerticalStrut(15));
 		}
@@ -338,7 +354,7 @@ public class GUI implements BananaListener{
 		
 		for(String s : parsedStrings.getStrings())
 		{
-			addInfoLine(stringsPanel, s);
+			addStringsLine(stringsPanel, s);
 		}
 		
 		infoPanel.add(stringsPanel);
@@ -348,7 +364,6 @@ public class GUI implements BananaListener{
 	
 	public void displaySectionHeaders() {
 		JPanel sectionsPanel = new JPanel();
-		
 		sectionsPanel.setLayout(new BoxLayout(sectionsPanel, BoxLayout.Y_AXIS));
 		sectionsPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 		
@@ -360,7 +375,11 @@ public class GUI implements BananaListener{
 		
 		for(SectionHeader section : sections)
 		{
-			addInfoLine(sectionsPanel, "<html><b>", (section.getName()+ "</b></html>"));
+			JPanel sectionsPanelHeader = new JPanel();
+			sectionsPanelHeader.setLayout(new BoxLayout(sectionsPanelHeader, BoxLayout.Y_AXIS));
+			sectionsPanelHeader.add(new JLabel("<html><h3>" + section.getName() + "</h3></html>"));
+			sectionsPanel.add(sectionsPanelHeader);
+			
 			addInfoLine(sectionsPanel, "Virtual Size: 0x", Long.toHexString(section.getVirtualSize()));
 			addInfoLine(sectionsPanel, "Virtual Address: 0x", Long.toHexString(section.getVirtualAddress()));
 			addInfoLine(sectionsPanel, "Raw Data Size: 0x", Long.toHexString(section.getSizeOfRawData()));
@@ -378,35 +397,83 @@ public class GUI implements BananaListener{
 		infoPanel.repaint();
 	}
 	
+	public void displayFileInformation() {
+		JPanel hashPanel = new JPanel();
+		hashPanel.setLayout(new BoxLayout(hashPanel, BoxLayout.Y_AXIS));
+		hashPanel.setBorder(BorderFactory.createRaisedBevelBorder());
+		
+		infoPanel.removeAll();
+		
+		addInfoLine(hashPanel, "File Size: ", String.format("0x%X (%.2f" + bytesFlag + ")", FileManager.getFileSize(), (convertToKb(FileManager.getFileSize()) )));
+		addInfoLine(hashPanel,"MD5 Hash: ", FileManager.getFileHash().get(0));
+		addInfoLine(hashPanel,"SHA-1 Hash: ", FileManager.getFileHash().get(1));
+		addInfoLine(hashPanel,"SHA-256 Hash: ", FileManager.getFileHash().get(2));
+		addInfoLine(hashPanel,"SHA-512 Hash: ", FileManager.getFileHash().get(3));
+		
+		infoPanel.add(hashPanel);
+		infoPanel.revalidate();
+		infoPanel.repaint();
+	}
+		
 	/**
 	 * Helper method for adding lines to info panel from parsed data
 	 * @param label
 	 * @param data
 	 */
 	public void addInfoLine(JPanel panel, String label, Object data) {
+		JTextField txt = new JTextField();
+		initializeTextField(txt, panel);
+		
 		if(data == null)
 		{
 			data = "NULL";
-			panel.add(new JLabel("<html><b>" + label + data + "</html></b>"));
+			txt.setText("<html><b>" + data + "</html></b>");
+			panel.add(txt);
 			return;
 		}
-		panel.add(new JLabel(label + data));
+		
+		txt.setText(label + String.valueOf(data));
+		panel.add(txt);
+	}
+	/**
+	 * Overloaded version to accept arguments without a label attached
+	 * @param panel
+	 * @param data
+	 */
+	public void addInfoLine(JPanel panel, Object data) {
+		JTextField txt = new JTextField();
+		initializeTextField(txt, panel);
+		if(data instanceof Integer) {
+			data = String.valueOf(data);
+		}
+		if(data == null)
+		{
+			data = "NULL";
+			txt.setText("<html><b>" + data + "</html></b>");
+			panel.add(txt);
+			return;
+		}
+		txt.setText(String.valueOf(data));
+		panel.add(txt);
 	}
 	
-	public void addInfoLine(JPanel panel, Object data) {
-		if(data == null)
-		{
-			data = "NULL";
-			panel.add(new JLabel("<html><b>" + data + "</html></b>"));
+	/**
+	 * Performs the same function as addInfoLine(), but adds JLabels directly to panel instead of inside a JTextField
+	 * <p>This is because separate JTextFields add a lot of whitespace, and the users doesn't really need to select/copy the output of strings</p>
+	 * @param panel
+	 * @param data
+	 */
+	public void addStringsLine(JPanel panel,  Object data) {
+
+			panel.add(new JLabel(String.valueOf(data)));
 			return;
-		}
-		panel.add(new JLabel((String) data));
 	}
 	
 	public void setFileName(String name) {
 		this.fileName = name;
 		scrollPane.setBorder(BorderFactory.createTitledBorder(fileName));
 	}
+	
 	public void setIcon() {
 		InputStream input = getClass()
 		        .getClassLoader()
@@ -424,7 +491,23 @@ public class GUI implements BananaListener{
 	
 	public double convertToKb (long bytes) {
 		
-		return bytes / 1024.0;
+		if(bytes >= 1000000)
+		{
+			return convertToMb(bytes);
+		}
+		bytesFlag = "kb";
+		return bytes / 1000.0;
+	}
+	
+	public void initializeTextField(JTextField txt, JPanel panel) {
+		txt.setEditable(false);
+		txt.setBackground(panel.getBackground());
+	}
+	
+	public double convertToMb (long bytes) {
+		
+		bytesFlag = "mb";
+		return bytes / (1024.0 * 1024);
 	}
 	
 	public ExceptionManager getExceptionManager() {

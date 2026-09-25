@@ -1,5 +1,6 @@
 package file;
 
+import java.io.File;
 import java.util.*;
 
 import exceptions.ExceptionManager;
@@ -12,10 +13,10 @@ public class FileManager {
 	private static boolean isMalformed;
 	private static boolean isFileLoaded;
 	private static ExceptionManager exceptionManager;
-	
+	private static ArrayList<String> fileHash;
+	private static long fileSize;
 	public FileManager(ExecutableFile importedFile) {
 		isFileLoaded = true;
-		System.out.println("In file manager " + exceptionManager.hashCode());
 		importedFile.setExceptionManager(exceptionManager);
 		importedFile.parse();
 		
@@ -68,8 +69,17 @@ public class FileManager {
 	        if (section.getName().equals(name)) {
 	            return section;
 	        }
+	        
 	    }
 	    return null;
+	}
+	
+	public static ArrayList<String> getFileHash() {
+		return fileHash;
+	}
+	
+	public static void setFileHash(ArrayList<String> hash) {
+		fileHash = hash;
 	}
 	
 	public static ExceptionManager getExceptionManager() {
@@ -84,6 +94,14 @@ public class FileManager {
 	
 	public static boolean getMalformedFlag() {
 		return isMalformed;
+	}
+	
+	public static void setFileSize(long size) {
+		fileSize = size;
+	}
+	
+	public static long getFileSize() {
+		return fileSize;
 	}
 	
 	public static boolean isFileLoaded() {

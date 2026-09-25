@@ -70,6 +70,8 @@ public class PEFile extends ExecutableFile {
 	@Override
 	public void parse() {
 		try {
+			long start, stop;
+			start = System.currentTimeMillis();
 			
 			//Seek e_lfanew
 			PE.seek(0x3c);
@@ -360,6 +362,9 @@ public class PEFile extends ExecutableFile {
 			
 			FileManager.setSusFlags(susFlags);
 			
+			stop = System.currentTimeMillis();
+			
+			System.out.println("Parse time in ms: " + (stop - start));
 			
 		} 
 		
@@ -703,27 +708,7 @@ public class PEFile extends ExecutableFile {
 		 * @return Message indicating state of the PE's optional header size
 		 * @throws OptionalHeaderSizeInvalidException
 		 */
-	public static String checkOptionalHeaderSize(int optionalHeaderSize) {
-		String message = null;
-		String giveSize = "Optional header size is: " + optionalHeaderSize + " ";
-		if (optionalHeaderSize == 224)
-		{	
-			message = ("Which indicates PE32 format (32-bit executable)");
-		}
-		else if(optionalHeaderSize == 240)
-		{
-			message = ("Which indicates PE32+ format (64-bit executable)");
-		}
-		else if(optionalHeaderSize == 0)
-		{
-			message = ("Which indicates Object file/ Unknown file format (Optional Header Size is zero)");
-		}
-		else
-		{
-			message = ("Which does not indicate a certain format");
-		}
-		return giveSize + message;
-	}
+	
 	
 	public Map<Integer, String> loadCharacteristics() {
 		
