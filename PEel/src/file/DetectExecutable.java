@@ -11,11 +11,11 @@ public final class DetectExecutable {
 		try {
 			//Do not create RAF if file is larger than 2GB
 			long fileSize = file.length();
-			if(fileSize>Integer.MAX_VALUE)
+			if(fileSize > Integer.MAX_VALUE)
 			{
 				throw new FileTooLargeException();
 			}
-			
+			FileManager.setFileSize(fileSize);
 			RandomAccessFile exeFile = new RandomAccessFile(file, "r");
 			
 			//Find virtual address 0
@@ -27,6 +27,7 @@ public final class DetectExecutable {
 				
 			if(MZheader == 0x4D5A && confirmPE(exeFile)) 
 			{
+				FileManager.setFileHash(HashFile.Hash(file));
 				return new PEFile(file, FileManager.getExceptionManager());
 			}
 			

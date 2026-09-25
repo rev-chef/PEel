@@ -37,10 +37,14 @@ public class MainMenuBar extends JMenuBar{
 	
 	private JMenu populateFileMenu() {
 		JMenu fileMenu = new JMenu("File");
-		JMenuItem importFileMenuItem, refreshFileMenuItem;
+		JMenuItem importFileMenuItem, refreshFileMenuItem, secondFileMenuItem;
 		
 		importFileMenuItem = new JMenuItem("Import File", KeyEvent.VK_F8);
 		refreshFileMenuItem = new JMenuItem("Reload File", KeyEvent.VK_F7);
+//		secondFileMenuItem = new JMenuItem("Import 2nd File", KeyEvent.VK_HIRAGANA);
+		
+		//set false until one file is already loaded in
+//		secondFileMenuItem.setEnabled(false);
 		
 		//Upload file
 		JFileChooser fileImportChooser = new JFileChooser();
@@ -63,6 +67,7 @@ public class MainMenuBar extends JMenuBar{
 		       
 		       if (FileManager.isFileLoaded()) {
 		    	    gui.drawBanana();
+//		    	    secondFileMenuItem.setEnabled(true);
 		    	} 
 		       else {
 		    	    pm.displayInvalidFilePopup();
@@ -70,8 +75,9 @@ public class MainMenuBar extends JMenuBar{
 		       
 		    }
 		});
-		 fileMenu.add(importFileMenuItem);
 		
+		 fileMenu.add(importFileMenuItem);
+//		 fileMenu.add(secondFileMenuItem);
 		return fileMenu;
 	}
 	

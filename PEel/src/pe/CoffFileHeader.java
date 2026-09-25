@@ -50,6 +50,13 @@ public ArrayList<String> getCharacteristics() {
 	return characteristics;
 }
 
+public String isDLL() {
+	if(this.characteristics.contains("Dynamic-link library (DLL)"))
+	{
+		return "DLL";
+	}
+	return "Executable Image";
+}
 @Override
 public String toString() {
 	return "Coff File Header: machine=" + machine + ", numberOfSections=" + numberOfSections + ", timeDateStamp="

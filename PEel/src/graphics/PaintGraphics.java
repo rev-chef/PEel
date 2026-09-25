@@ -123,6 +123,7 @@ public class PaintGraphics extends JPanel{
 				case 1 -> "Imports / Exports";
 				case 2 -> "Strings";
 				case 3 -> "Section Headers";
+				case 4 -> "File Info";
 				default -> "TBD";
 				};
 				
